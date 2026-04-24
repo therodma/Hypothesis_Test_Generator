@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hypothesis Testing Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">∑</span>
+        <span class="logo-text">Statly</span>
+      </div>
+      <p class="logo-sub">Hypothesis Testing Tool</p>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="mode-switcher">
+      <button id="btn-mode1" class="mode-btn active" onclick="switchMode(1)">⊞ Manual Mode</button>
+      <button id="btn-mode2" class="mode-btn" onclick="switchMode(2)">✦ Problem Solver</button>
+    </div>
+
+    <!-- MODE 1 -->
+    <div id="mode1" class="mode-panel">
+      <div class="card">
+        <h2>Upload Dataset</h2>
+        <input type="file" id="dataset-file" accept=".csv,.xlsx,.xls" onchange="loadDataset(this)" />
+        <div id="dataset-preview"></div>
+      </div>
+
+      <div class="card" id="test-config" style="display:none">
+        <h2>Configure Test</h2>
+        <label>Select Test
+          <select id="test-select" onchange="renderTestConfig()">
+            <option value="">-- Choose a test --</option>
+            <optgroup label="T-Tests">
+              <option value="one-sample-t">One-Sample T-Test</option>
+              <option value="two-sample-t">Two-Sample T-Test (Independent)</option>
+              <option value="paired-t">Paired T-Test</option>
+            </optgroup>
+            <optgroup label="Z-Tests">
+              <option value="one-sample-z">One-Sample Z-Test</option>
+              <option value="z-prop">Z-Test for Proportion (One-Sample)</option>
+              <option value="z-prop-two">Z-Test for Proportion (Two-Sample)</option>
+            </optgroup>
+            <optgroup label="ANOVA">
+              <option value="one-way-anova">One-Way ANOVA + Tukey HSD</option>
+              <option value="two-way-anova">Two-Way ANOVA</option>
+            </optgroup>
+            <optgroup label="Chi-Square">
+              <option value="chi-square-indep">Chi-Square: Test of Independence</option>
+              <option value="chi-square-gof">Chi-Square: Goodness of Fit</option>
+            </optgroup>
+            <optgroup label="Correlation">
+              <option value="pearson">Pearson Correlation</option>
+              <option value="spearman">Spearman Correlation</option>
+              <option value="kendall">Kendall's Tau</option>
+            </optgroup>
+            <optgroup label="Non-Parametric">
+              <option value="mann-whitney">Mann-Whitney U</option>
+              <option value="kruskal-wallis">Kruskal-Wallis</option>
+              <option value="binomial">Binomial Test</option>
+            </optgroup>
+            <optgroup label="Variance / Normality">
+              <option value="f-test">F-Test (Variance Ratio)</option>
+              <option value="levene">Levene's Test</option>
+              <option value="shapiro-wilk">Shapiro-Wilk Normality Test</option>
+            </optgroup>
+          </select>
+        </label>
+        <div id="test-params"></div>
+        <button class="run-btn" onclick="runManualTest()">Run Test</button>
+      </div>
+
+      <div class="card" id="manual-results" style="display:none">
+        <h2>Results</h2>
+        <div id="manual-results-content"></div>
+        <div id="manual-chart-wrap" style="display:none;margin-top:1.2rem">
+          <canvas id="manual-chart" height="110"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODE 2 -->
+    <div id="mode2" class="mode-panel" style="display:none">
+      <div class="card">
+        <h2>Upload Problem File</h2>
+        <p class="hint">Supported: PDF, TXT, DOCX, PNG, JPG</p>
+        <input type="file" id="problem-file" accept=".pdf,.txt,.docx,.png,.jpg,.jpeg" onchange="loadProblemFile(this)" />
+        <div id="extracted-text-box" style="display:none">
+          <label>Extracted Text (editable)</label>
+          <textarea id="extracted-text" rows="8"></textarea>
+        </div>
+      </div>
+
+      <div class="card" id="api-config-card">
+        <h2>Claude API Key</h2>
+        <p class="hint">Your key is never stored — used only for this session.</p>
+        <input type="password" id="api-key" placeholder="sk-ant-..." />
+        <button class="run-btn" onclick="solveProblem()">Solve Problem</button>
+      </div>
+
+      <div class="card" id="solver-results" style="display:none">
+        <h2>Solution</h2>
+        <div id="solver-results-content"></div>
+        <div id="solver-chart-wrap" style="display:none;margin-top:1.2rem">
+          <canvas id="solver-chart" height="110"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p>Statly &mdash; all computations run locally in your browser</p>
+  </footer>
+
+  <!-- CDN Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.6/jstat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
