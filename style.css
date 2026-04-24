@@ -68,17 +68,10 @@ body {
 
 .logo-text {
   font-family: var(--font-serif);
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--cream);
   letter-spacing: 0.02em;
-}
-
-.logo-sub {
-  font-size: 0.75rem;
-  color: var(--ink-light);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 /* ── Container ───────────────────────────────────────────────────────────────── */

@@ -1,4 +1,4 @@
-# Statly — Hypothesis Testing Tool
+# Hypothesis Testing Tool
 
 A browser-based hypothesis testing tool with two modes: manually run tests on uploaded datasets, or drop in a stats problem and let Claude solve it step by step.
 
@@ -68,7 +68,7 @@ Extracted text is shown in an editable textarea before sending, so you can fix a
 
 Just open `index.html` in a browser — no server or install needed for Manual Mode.
 
-For Problem Solver Mode you need a Claude API key from [console.anthropic.com](https://console.anthropic.com). Enter it in the key field (it is never stored — session only).
+For Problem Solver Mode a Claude API key is required. Set it directly in `app.js` by replacing `YOUR_API_KEY`, or route requests through a backend proxy.
 
 > **Note:** Direct browser calls to the Claude API require the `anthropic-dangerous-direct-browser-access` header. For production use, route requests through a backend proxy instead.
 
