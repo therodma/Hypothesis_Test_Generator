@@ -729,7 +729,8 @@ After your full explanation, output a JSON block (and nothing after it) in this 
 
 async function solveProblem() {
   const text = document.getElementById('extracted-text')?.value?.trim();
-  const apiKey = 'YOUR_API_KEY'; // replace with your key or use a backend proxy
+  const apiKey = document.getElementById('api-key').value.trim();
+  if (!apiKey) return alert('Please enter your Claude API key.');
   if (!text) return alert('Please upload a problem file first.');
 
   const resultsCard = document.getElementById('solver-results');
