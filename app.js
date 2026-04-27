@@ -699,7 +699,7 @@ async function extractImage(file) {
   return text.trim();
 }
 
-// ─── Mode 2: Claude API ───────────────────────────────────────────────────────
+// ─── Mode 2: Gemini API ──────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are an expert statistics tutor. When given a hypothesis testing problem, you must:
 
 1. Identify the correct test from this list: one-sample t-test, two-sample t-test, paired t-test, one-sample z-test, z-test for proportion (one-sample), z-test for proportion (two-sample), F-test (variance ratio), one-way ANOVA, two-way ANOVA, chi-square goodness of fit, chi-square test of independence, Pearson correlation, Spearman correlation, Kendall's tau, Mann-Whitney U, Kruskal-Wallis, binomial test, Levene's test, Shapiro-Wilk.
@@ -730,28 +730,21 @@ After your full explanation, output a JSON block (and nothing after it) in this 
 async function solveProblem() {
   const text = document.getElementById('extracted-text')?.value?.trim();
   const apiKey = document.getElementById('api-key').value.trim();
-  if (!apiKey) return alert('Please enter your Claude API key.');
   if (!text) return alert('Please upload a problem file first.');
+  if (!apiKey) return alert('Please enter your Gemini API key.');
 
   const resultsCard = document.getElementById('solver-results');
   const content = document.getElementById('solver-results-content');
   resultsCard.style.display = '';
-  content.innerHTML = '<div class="loading"><div class="spinner"></div> Sending to Claude…</div>';
+  content.innerHTML = '<div class="loading"><div class="spinner"></div> Solving with Gemini…</div>';
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
-        max_tokens: 3000,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: text }]
+        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: [{ parts: [{ text }] }]
       })
     });
 
@@ -761,7 +754,8 @@ async function solveProblem() {
     }
 
     const data = await res.json();
-    const raw = data.content[0].text;
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!raw) throw new Error('No response from Gemini.');
     content.innerHTML = renderSolverOutput(raw);
   } catch (e) {
     content.innerHTML = `<div class="error-msg">Error: ${e.message}</div>`;
